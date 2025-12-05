@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  password       String    // Hash du mot de passe
+  username       String    @unique
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  // Relations d'Amitié
+  sentRequests   Friendship[] @relation("SentFriendRequests")
+  receivedRequests Friendship[] @relation("ReceivedFriendRequests")
+  
+  // Relations de Chat
+  messages        Message[]
+  user1DMs        DirectMessage[] @relation("User1DMs")
+  user2DMs        DirectMessage[] @relation("User2DMs")
+  
+  // Relations de Groupe
+  createdGroups   Group[] @relation("CreatedGroups")
+  groupMemberships GroupMember[] 
+}
+
+// =========================================================
+// MODÈLE 2: GESTION DES AMIS (Friendship)
+// =========================================================
+
+// Table Many-to-Many qui gère les demandes et le statut d'ami
+model Friendship {
+  senderId    String
+  receiverId  String
+  
+  status      String  @default("PENDING") // PENDING, ACCEPTED, BLOCKED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  sender      User    @relation("SentFriendRequests", fields: [senderId], references: [id])
+  receiver    User    @relation("ReceivedFriendRequests", fields: [receiverId], references: [id])
+  
+  @@id([senderId, receiverId])
+}
+
+
+// =========================================================
+// MODÈLE 3: CONVERSATION PRIVÉE (DirectMessage - P2P Stricte)
+// =========================================================
+
+// Une conversation entre EXACTEMENT deux utilisateurs.
+model DirectMessage {
+  id             String    @id @default(cuid())
+  
+  user1Id        String
+  user2Id        String
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  
+  user1          User      @relation("User1DMs", fields: [user1Id], references: [id])
+  user2          User      @relation("User2DMs", fields: [user2Id], references: [id])
+  messages       Message[] @relation("DM_Messages")
+  
+  // Clé unique pour garantir qu'une seule DM existe entre deux utilisateurs,
+  // quelle que soit l'ordre de user1Id et user2Id (cette vérification sera faite par votre code Express)
+  @@unique([user1Id, user2Id]) 
+}
+
+// =========================================================
+// MODÈLE 4: SALONS DE GROUPE (Group Chat)
+// =========================================================
+
+// La table principale du groupe
+model Group {
+  id             String    @id @default(cuid())
+  name           String
+  creatorId      String
+  createdAt      DateTime  @default(now())
+  
+  creator        User      @relation("CreatedGroups", fields: [creatorId], references: [id])
+  messages       Message[] @relation("Group_Messages")
+  members        GroupMember[]
+}
+
+// Table pivot pour la relation Many-to-Many entre User et Group
+model GroupMember {
+  userId         String
+  groupId        String
+  role           String @default("MEMBER")
+  joinedAt       DateTime @default(now())
+  
+  user           User   @relation(fields: [userId], references: [id])
+  group          Group  @relation(fields: [groupId], references: [id])
+  
+  @@id([userId, groupId])
+}
+
+
+// =========================================================
+// MODÈLE 5: MESSAGE (Message)
+// =========================================================
+
+// Un message doit appartenir soit à un DM, soit à un Groupe.
+model Message {
+  id             String    @id @default(cuid())
+  content        String
+  createdAt      DateTime  @default(now())
+  
+  // Clés étrangères
+  directMessageId String? // ID de la conversation privée (peut être NULL)
+  groupId         String? // ID du groupe (peut être NULL)
+  authorId        String
+  
+  // Relations
+  directMessage  DirectMessage? @relation("DM_Messages", fields: [directMessageId], references: [id])
+  group          Group?         @relation("Group_Messages", fields: [groupId], references: [id])
+  author         User           @relation(fields: [authorId], references: [id])
+}

@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    /* 📁 Configuration de base */
+    "target": "es2020",             /* Spécifie le moteur JS cible pour l'exécution (Node.js moderne) */
+    "module": "commonjs",           /* Spécifie le système de modules (correspond à "type": "commonjs" dans package.json) */
+    "rootDir": "./src",             /* Emplacement des fichiers sources */
+    "outDir": "./dist",             /* Emplacement où le JavaScript compilé sera placé */
+    "esModuleInterop": true,        /* Important pour l'import/export entre CommonJS et ES Modules */
+    "forceConsistentCasingInFileNames": true,
+
+    /* 🛡️ Stricte et types */
+    "strict": true,                 /* Active toutes les options de vérification de type strictes */
+    "skipLibCheck": true,           /* Accélère la compilation en ignorant les fichiers de déclaration */
+    
+    /* 🐛 Débogage (optionnel) */
+    "sourceMap": true               /* Génère des maps pour le débogage */
+  },
+  "include": ["src/**/*"]           /* Spécifie les fichiers à inclure */
+}
