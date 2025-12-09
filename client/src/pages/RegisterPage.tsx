@@ -3,8 +3,8 @@ import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { type RegisterFormData } from '../types/authType';
 import { registerUser } from '../services/authService';
 import { AxiosError } from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-// IMPORTANT : Import du fichier CSS
 import './RegisterPage.css';
 
 export default function RegisterPage() {
@@ -17,6 +17,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -35,6 +36,9 @@ export default function RegisterPage() {
       await registerUser(formData);
       setSuccess('Inscription réussie ! Vous pouvez maintenant vous connecter.');
       setFormData({ username: '', email: '', password: '' });
+      setTimeout(() => {
+        navigate('/connexion')
+      }, 3000);
     } catch (err) {
       const axiosError = err as AxiosError<{ error: string }>;
       setError(axiosError.response?.data?.error || 'Une erreur est survenue.');
@@ -97,14 +101,10 @@ export default function RegisterPage() {
           </small>
         </div>
 
-        {/* Messages */}
         {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
 
-        {/* Bouton */}
-        <button type="submit" className="btn-submit" disabled={isLoading}>
-          {isLoading ? 'Chargement...' : "S'inscrire"}
-        </button>
+        <button type="submit" className="btn-submit">S'inscrire</button>
       </form>
     </div>
   );

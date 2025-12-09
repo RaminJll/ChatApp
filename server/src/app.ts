@@ -1,9 +1,8 @@
 // server/src/app.ts
 import express, { Application } from 'express';
 import cors from 'cors';
-// 1. Importer vos routeurs
 import authRouter from './routes/auth'; 
-import indexRouter from './routes/index';
+import users from './routes/users'
 
 const app: Application = express();
 
@@ -12,6 +11,6 @@ app.use(cors());
 
 
 app.use('/auth', authRouter); 
-app.use('/', indexRouter);
+app.use('/users', users)
 
 export default app;

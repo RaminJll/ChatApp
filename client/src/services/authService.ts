@@ -1,10 +1,14 @@
 // src/services/authService.ts
 import axios from 'axios';
 import { type RegisterFormData } from '../types/authType';
-
-const API_URL = '/api/auth'; 
+import { type LoginFormData } from '../types/authType';
 
 export const registerUser = async (data: RegisterFormData) => {
-  const response = await axios.post(`${API_URL}/inscription`, data);
+  const response = await axios.post('/api/auth/inscription', data);
   return response.data;
 };
+
+export const loginUser = async (data: LoginFormData) => {
+  const response = await axios.post('/api/auth/connexion', data);
+  return response.data;
+}

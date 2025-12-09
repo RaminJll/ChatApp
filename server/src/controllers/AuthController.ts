@@ -26,7 +26,7 @@ export class AuthController {
         try {
             const newUser = await authService.registerUser(email, password, username);
 
-            return res.status(201).json({ 
+            return res.status(200).json({ 
                 message: 'Inscription réussie', 
                 user: newUser 
             });
@@ -34,7 +34,7 @@ export class AuthController {
         } catch (error) {
             if (error instanceof Error) {
                 if (error.message === "L'utilisateur existe déjà") {
-                    return res.status(409).json({ error: error.message });
+                    return res.status(500).json({ error: error.message });
                 }
             }
 
@@ -63,7 +63,7 @@ export class AuthController {
 
             if (error instanceof Error) {
                 if (error.message === "Identifiants invalides") {
-                    return res.status(401).json({ error: error.message });
+                    return res.status(500).json({ error: error.message });
                 }
             }
 

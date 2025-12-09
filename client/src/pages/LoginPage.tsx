@@ -1,10 +1,10 @@
 // src/pages/RegisterPage.tsx
 import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { type LoginFormData } from '../types/authType';
-import { registerUser } from '../services/authService';
+import { loginUser } from '../services/authService';
 import { AxiosError } from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-// IMPORTANT : Import du fichier CSS
 import './LoginPage.css';
 
 export default function LoginPage() {
@@ -16,12 +16,17 @@ export default function LoginPage() {
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleInscriptionClick = () => {
+    navigate('/inscription'); 
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -31,7 +36,7 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      await registerUser(formData);
+      await loginUser(formData);
       setSuccess('Connexion réussie !');
       setFormData({ email: '', password: '' });
     } catch (err) {
@@ -43,8 +48,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="register-container">
-      <h2 className="register-title">Inscription</h2>
+    <div className="Connexion-container">
+      <h2 className="Connexion-title">Connexion</h2>
       
       <form onSubmit={handleSubmit}>
 
@@ -81,15 +86,13 @@ export default function LoginPage() {
           </small>
         </div>
 
-        {/* Messages */}
         {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
 
-        {/* Bouton */}
-        <button type="submit" className="btn-submit" disabled={isLoading}>
-          {isLoading ? 'Chargement...' : "S'inscrire"}
-        </button>
+        <button type="submit" className="btn-submit">Connexion</button>
       </form>
+
+      <button type="button" className="btn-inscription" onClick={handleInscriptionClick}>Créer un compte</button>
     </div>
   );
 }
