@@ -1,86 +1,136 @@
-// src/pages/HomePage.tsx
-import { useState, type ChangeEvent } from 'react';
+import { useState, useEffect, type ChangeEvent } from 'react';
 import { getAllUsersService } from '../services/usersService';
 import type { User } from '../types/userType';
+import { 
+    sendFriendRequestApi, 
+    getReceivedRequestsApi, 
+    acceptFriendRequestApi, 
+    refuseFriendRequestApi,
+    getFriendsListApi
+} from '../services/friendsService';
+import type { ReceivedRequest } from '../types/friendsType';
+
 import './HomePage.css';
 
 export default function HomePage() {
-    // États d'affichage
-    const [viewMode, setViewMode] = useState<'default' | 'search'>('default');
+    // --- ÉTATS D'AFFICHAGE ---
+    const [viewMode, setViewMode] = useState<'default' | 'search' | 'requests'>('default');
     const [showAddFriendMenu, setShowAddFriendMenu] = useState(false);
-    
-    // États de données
-    const [searchQuery, setSearchQuery] = useState('');
-    const [allUsersList, setAllUsersList] = useState<User[]>([]); 
-    const [searchResults, setSearchResults] = useState<User[]>([]);
-    
-    // ⬅️ NOUVEAU : État de chargement
     const [isLoading, setIsLoading] = useState(false);
 
-    // Données fictives (Discussions actuelles)
-    const discussions = [
-        { id: 1, name: "Alice Dupont", lastMessage: "Super, à demain !" },
-        { id: 2, name: "Bob Martin", lastMessage: "OK, je t'envoie ça." },
-    ];
-    
-    const activeChat = {
-        contactName: "Alice Dupont",
-        messages: [
-            { id: 1, text: "Salut !", sender: 'self' },
-            { id: 2, text: "Ça va ?", sender: 'Alice' },
-        ]
+    // --- ÉTATS DE DONNÉES ---
+    const [searchQuery, setSearchQuery] = useState('');
+    const [allUsersList, setAllUsersList] = useState<User[]>([]); // Pour la recherche
+    const [searchResults, setSearchResults] = useState<User[]>([]); // Résultats filtrés
+    const [receivedRequests, setReceivedRequests] = useState<ReceivedRequest[]>([]); // Demandes reçues
+    const [friendsList, setFriendsList] = useState<User[]>([]); // Liste d'amis confirmés
+
+    // --- ÉTAT DE LA CONVERSATION ACTIVE ---
+    // On stocke l'ami avec qui on discute actuellement (null si aucun sélectionné)
+    const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
+
+    // Chargement initial des amis
+    useEffect(() => {
+        fetchFriends();
+    }, []);
+
+    const fetchFriends = async () => {
+        try {
+            const friends = await getFriendsListApi();
+            console.log(friends);
+            setFriendsList(friends);
+        } catch (error) {
+            console.error("Erreur chargement amis", error);
+        }
     };
 
-    // 1. Déclenché quand on clique sur "Ajouter une personne"
+    // --- GESTION RECHERCHE ---
     const startSearchMode = async () => {
         setShowAddFriendMenu(false);
         setViewMode('search');
         setSearchQuery('');
-        setSearchResults([]); // Reset des résultats affichés
-
-        // ⬅️ Début du chargement
+        setSearchResults([]);
         setIsLoading(true);
-
         try {
-            // Appel au service (qui retourne maintenant directement User[])
             const users = await getAllUsersService();
-            
-            // ⚠️ Sécurité : On vérifie si c'est bien un tableau pour éviter le crash .filter()
-            if (Array.isArray(users)) {
-                setAllUsersList(users);
-            } else {
-                console.error("Format de réponse inattendu (pas un tableau):", users);
-                setAllUsersList([]); 
-            }
-            
+            if (Array.isArray(users)) setAllUsersList(users);
         } catch (error) {
-            console.error("Erreur lors du chargement des utilisateurs", error);
+            console.error(error);
         } finally {
-            // ⬅️ Fin du chargement
             setIsLoading(false);
         }
     };
 
-    // 2. Gestion de la saisie (Filtrage local)
     const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setSearchQuery(query);
-
         if (query.trim() === '') {
             setSearchResults([]);
         } else {
-            // Filtrage sur la liste chargée
-            const results = allUsersList.filter(user => 
+            const results = allUsersList.filter(user =>
                 user.username.toLowerCase().includes(query.toLowerCase())
             );
             setSearchResults(results);
         }
     };
 
-    const closeSearch = () => {
+    const handleSendRequest = async (userIdToAdd: string, username: string) => {
+        try {
+            await sendFriendRequestApi(userIdToAdd);
+            alert(`Demande d'ami envoyée à ${username} !`);
+        } catch (error: any) {
+            const msg = error.response?.data?.error || "Erreur lors de l'envoi";
+            alert(msg);
+        }
+    };
+
+    // --- GESTION DEMANDES REÇUES ---
+    const showRequestsMode = async () => {
+        setViewMode('requests');
+        setIsLoading(true);
+        try {
+            const requests = await getReceivedRequestsApi();
+            setReceivedRequests(requests);
+        } catch (error) {
+            console.error("Erreur chargement demandes", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleAccept = async (senderId: string, username: string) => {
+        try {
+            await acceptFriendRequestApi(senderId);
+            alert(`${username} est maintenant votre ami !`);
+            setReceivedRequests(prev => prev.filter(req => req.senderId !== senderId));
+            fetchFriends(); // Recharger la liste d'amis
+        } catch (error) {
+            console.error(error);
+            alert("Erreur lors de l'acceptation.");
+        }
+    };
+
+    const handleRefuse = async (senderId: string) => {
+        if (!confirm("Voulez-vous refuser cette demande ?")) return;
+        try {
+            await refuseFriendRequestApi(senderId);
+            setReceivedRequests(prev => prev.filter(req => req.senderId !== senderId));
+        } catch (error) {
+            console.error(error);
+            alert("Erreur lors du refus.");
+        }
+    };
+
+    // --- NAVIGATION ---
+    const closeSpecialMode = () => {
         setViewMode('default');
         setSearchQuery('');
         setSearchResults([]);
+    };
+
+    const handleFriendClick = (friend: User) => {
+        setSelectedFriend(friend);
+        // TODO: Ici, on déclenchera plus tard le chargement des messages réels
     };
 
     return (
@@ -90,20 +140,14 @@ export default function HomePage() {
                 {/* --- HEADER --- */}
                 {viewMode === 'default' ? (
                     <header className="sidebar-header icons-bar">
-                        <div className="icon-item active" title="Discussions">💬</div>
+                        <div className="icon-item" title="Demandes reçues" onClick={showRequestsMode}>📩</div>
+                        <div className="icon-item" title="Discussions">💬</div>
                         <div className="icon-item" title="Groupes">👥</div>
-
-                        <div
-                            className="icon-item-dropdown"
-                            onMouseEnter={() => setShowAddFriendMenu(true)}
-                            onMouseLeave={() => setShowAddFriendMenu(false)}
-                        >
+                        <div className="icon-item-dropdown" onMouseEnter={() => setShowAddFriendMenu(true)} onMouseLeave={() => setShowAddFriendMenu(false)}>
                             <div className="icon-item" title="Ajouter">➕</div>
                             {showAddFriendMenu && (
                                 <div className="dropdown-menu">
-                                    <div className="dropdown-item" onClick={startSearchMode}>
-                                        Ajouter une personne
-                                    </div>
+                                    <div className="dropdown-item" onClick={startSearchMode}>Ajouter une personne</div>
                                     <div className="dropdown-item">Créer un groupe</div>
                                 </div>
                             )}
@@ -111,77 +155,125 @@ export default function HomePage() {
                     </header>
                 ) : (
                     <header className="sidebar-header search-mode">
-                        <button className="back-btn" onClick={closeSearch}>🔙</button>
-                        <input 
-                            type="text" 
-                            className="search-friend-input" 
-                            placeholder="Rechercher un pseudo..." 
-                            value={searchQuery}
-                            onChange={handleSearch}
-                            autoFocus
-                        />
+                        <button className="back-btn" onClick={closeSpecialMode}>🔙</button>
+                        {viewMode === 'search' ? (
+                            <input
+                                type="text"
+                                className="search-friend-input"
+                                placeholder="Rechercher un pseudo..."
+                                value={searchQuery}
+                                onChange={handleSearch}
+                                autoFocus
+                            />
+                        ) : (
+                            <h4 style={{margin: 0, color: '#555'}}>Demandes reçues</h4>
+                        )}
                     </header>
                 )}
 
                 {/* --- LISTE --- */}
                 <div className="discussion-list">
-                    {viewMode === 'search' ? (
+
+                    {/* MODE RECHERCHE */}
+                    {viewMode === 'search' && (
                         <>
-                            {/* Message de Chargement */}
-                            {isLoading && (
-                                <div style={{padding: '20px', textAlign: 'center', color: '#3498db'}}>
-                                    Chargement...
+                            {!isLoading && searchResults.map(user => (
+                                <div key={user.id} className="discussion-item">
+                                    <div className="avatar">{user.username.charAt(0).toUpperCase()}</div>
+                                    <div className="info">
+                                        <p className="contact-name">{user.username}</p>
+                                        <small className="last-message">Cliquez pour ajouter</small>
+                                    </div>
+                                    <button
+                                        style={{ border: 'none', background: 'transparent', color: '#3498db', cursor: 'pointer', fontSize: '1.2rem' }}
+                                        onClick={() => handleSendRequest(String(user.id), user.username)}
+                                    >
+                                        +
+                                    </button>
                                 </div>
+                            ))}
+                        </>
+                    )}
+
+                    {/* MODE DEMANDES REÇUES */}
+                    {viewMode === 'requests' && (
+                        <>
+                            {isLoading && <div style={{padding: 20}}>Chargement...</div>}
+                            {!isLoading && receivedRequests.length === 0 && (
+                                <div style={{padding: 20, color: '#888', textAlign: 'center'}}>Aucune demande.</div>
                             )}
+                            {!isLoading && receivedRequests.map(req => (
+                                <div key={req.senderId} className="discussion-item">
+                                    <div className="avatar" style={{backgroundColor: '#9b59b6'}}>{req.sender.username.charAt(0).toUpperCase()}</div>
+                                    <div className="info">
+                                        <p className="contact-name">{req.sender.username}</p>
+                                        <small className="last-message">Veut être votre ami</small>
+                                    </div>
+                                    <div style={{display: 'flex', gap: '10px'}}>
+                                        <button onClick={() => handleAccept(req.senderId, req.sender.username)} style={{border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2rem'}}>✅</button>
+                                        <button onClick={() => handleRefuse(req.senderId)} style={{border: 'none', background: 'none', cursor: 'pointer', fontSize: '1.2rem'}}>❌</button>
+                                    </div>
+                                </div>
+                            ))}
+                        </>
+                    )}
 
-                            {/* Résultats (si pas en chargement) */}
-                            {!isLoading && (
-                                <>
-                                    {searchResults.length === 0 && searchQuery !== '' && (
-                                        <div style={{padding: '20px', textAlign: 'center', color: '#888'}}>
-                                            Aucun utilisateur trouvé
+                    {/* MODE PAR DÉFAUT : LISTE D'AMIS */}
+                    {viewMode === 'default' && (
+                        <>
+                            {friendsList.length === 0 ? (
+                                <div style={{padding: 20, textAlign: 'center', color: '#888'}}>
+                                    Vous n'avez pas encore d'amis.<br/>
+                                    Ajoutez-en via le menu ➕ !
+                                </div>
+                            ) : (
+                                friendsList.map(friend => (
+                                    <div 
+                                        key={friend.id} 
+                                        className={`discussion-item ${selectedFriend?.id === friend.id ? 'active' : ''}`}
+                                        onClick={() => handleFriendClick(friend)}
+                                    >
+                                        <div className="avatar" style={{backgroundColor: '#3498db'}}>
+                                            {friend.username.charAt(0).toUpperCase()}
                                         </div>
-                                    )}
-
-                                    {searchResults.map(user => (
-                                        <div key={user.id} className="discussion-item">
-                                            <div className="avatar">{user.username.charAt(0).toUpperCase()}</div>
-                                            <div className="info">
-                                                <p className="contact-name">{user.username}</p>
-                                                <small className="last-message">Cliquez pour ajouter</small>
-                                            </div>
-                                            <button style={{border: 'none', background: 'transparent', color: '#3498db', cursor: 'pointer', fontSize: '1.2rem'}}>+</button>
+                                        <div className="info">
+                                            <p className="contact-name">{friend.username}</p>
+                                            <small className="last-message">Appuyez pour discuter</small>
                                         </div>
-                                    ))}
-                                </>
+                                    </div>
+                                ))
                             )}
                         </>
-                    ) : (
-                        discussions.map(disc => (
-                            <div key={disc.id} className={`discussion-item ${disc.id === 1 ? 'active' : ''}`}>
-                                <div className="avatar">A</div>
-                                <div className="info">
-                                    <p className="contact-name">{disc.name}</p>
-                                    <small className="last-message">{disc.lastMessage}</small>
-                                </div>
-                            </div>
-                        ))
                     )}
                 </div>
             </aside>
 
-            {/* Zone de Chat (Inchangée) */}
+            {/* --- ZONE DE CHAT PRINCIPALE --- */}
             <main className="chat-area">
-                <header className="chat-header"><h4>{activeChat.contactName}</h4></header>
-                <div className="messages-container">
-                    {activeChat.messages.map(msg => (
-                        <div key={msg.id} className={`message-bubble ${msg.sender === 'self' ? 'self' : 'other'}`}>{msg.text}</div>
-                    ))}
-                </div>
-                <div className="input-area">
-                    <input type="text" className="chat-input" placeholder="Écrire..." />
-                    <button className="send-button">Envoyer</button>
-                </div>
+                {selectedFriend ? (
+                    <>
+                        <header className="chat-header">
+                            <h4>{selectedFriend.username}</h4>
+                        </header>
+                        
+                        <div className="messages-container">
+                            {/* C'est ici qu'on affichera la vraie liste des messages plus tard */}
+                            <div style={{textAlign: 'center', marginTop: '50px', color: '#888'}}>
+                                Début de la conversation avec {selectedFriend.username}.<br/>
+                                (Les messages ne sont pas encore chargés depuis le backend)
+                            </div>
+                        </div>
+
+                        <div className="input-area">
+                            <input type="text" className="chat-input" placeholder="Écrire..." />
+                            <button className="send-button">Envoyer</button>
+                        </div>
+                    </>
+                ) : (
+                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#aaa'}}>
+                        <h3>Sélectionnez un ami pour commencer à discuter</h3>
+                    </div>
+                )}
             </main>
         </div>
     );

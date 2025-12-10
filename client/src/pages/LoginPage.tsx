@@ -15,7 +15,6 @@ export default function LoginPage() {
 
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -33,17 +32,19 @@ export default function LoginPage() {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setIsLoading(true);
     
     try {
-      await loginUser(formData);
+      const response = await loginUser(formData);
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
       setSuccess('Connexion réussie !');
       setFormData({ email: '', password: '' });
+      setTimeout(() => {
+        navigate('/accueil')
+      }, 2000);
     } catch (err) {
       const axiosError = err as AxiosError<{ error: string }>;
       setError(axiosError.response?.data?.error || 'Une erreur est survenue.');
-    } finally {
-      setIsLoading(false);
     }
   };
 

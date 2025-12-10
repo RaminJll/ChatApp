@@ -3,8 +3,8 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-interface AuthRequest extends Request {
-  userId?: string; 
+export interface AuthRequest extends Request {
+  userId?: string;
 }
 
 export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {

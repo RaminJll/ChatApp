@@ -8,7 +8,7 @@ import { authenticateToken } from '../middlewares/auth.middleware';
 const router: Router = Router();
 const userController = new UserController();
 
-router.get('/allUsers', userController.allUsers);
+router.get('/allUsers', authenticateToken, userController.allUsers);
 
 
 export default router;
