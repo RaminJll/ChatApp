@@ -1,9 +1,8 @@
 // src/server.ts
-import app from './app';
+import { httpServer } from './app';
 
 const PORT = process.env.PORT || 3000;
 
-// Démarre l'écoute de l'application
-app.listen(PORT, () => {
-  console.log(`Express est en cours d'exécution sur le port http://localhost:${PORT}`);
+httpServer.listen(PORT, () => {
+  console.log(`Serveur (Express + Socket.io) en cours d'exécution sur http://localhost:${PORT}`);
 });

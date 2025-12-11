@@ -1,261 +1,749 @@
 /* src/pages/HomePage.css */
 
-.chat-layout {
-    display: grid;
-    grid-template-columns: 320px 1fr; 
-    height: 100vh;
-    overflow: hidden;
-    background-color: #f0f2f5;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* src/pages/HomePage.css */
+.home-container {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: 100vh;
+    background: #f8fafc;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
 
-/* ... (Le LAYOUT GENERAL Grid reste le même) ... */
-
-/* ----------------------------------- */
-/* 1. SIDEBAR (Discussions/Contacts) */
-/* ----------------------------------- */
-.chat-sidebar {
-    /* ... (reste le même) ... */
-    background-color: #ffffff;
-    border-right: 1px solid #ddd;
+/* ===== SIDEBAR ===== */
+.sidebar {
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* NOUVEAUX STYLES POUR LE DROPDOWN */
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
 
-/* Le conteneur parent (icône + menu) doit être en position relative */
-.icon-item-dropdown {
-    /* Permet de positionner le menu en ABSOLUTE par rapport à lui */
-    position: relative; 
-    display: flex; /* Pour que l'icône prenne juste la place nécessaire */
+.header-icons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
     align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    color: #64748b;
+    font-size: 18px;
 }
 
-/* Le menu déroulant lui-même */
+.icon-btn:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.icon-btn-active {
+    background: #3b82f6;
+    color: white;
+}
+
+.icon-btn-add {
+    background: #3b82f6;
+    color: white;
+}
+
+.dropdown-container {
+    position: relative;
+}
+
 .dropdown-menu {
     position: absolute;
-    top: 100%; /* S'assure qu'il commence juste au bord du parent */
-    left: 50%; 
-    transform: translateX(-50%); 
-    z-index: 10;
-    
-    background-color: #fff;
-    border: 1px solid #ddd;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
-    padding: 5px 0;
-    min-width: 180px; 
-    
-    /* ❌ SUPPRIMER CETTE LIGNE si elle existe, ou s'assurer qu'elle est à 0 */
-    margin-top: 0; 
+    left: 0;
+    width: 200px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    z-index: 1000;
 }
 
 .dropdown-item {
-    padding: 10px 15px;
-    font-size: 0.95rem;
-    color: #333;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 8px;
     cursor: pointer;
-    white-space: nowrap;
+    color: #334155;
+    font-size: 14px;
+    transition: background 0.2s ease;
 }
 
 .dropdown-item:hover {
-    background-color: #f0f0f0;
+    background: #f1f5f9;
 }
 
-
-/* STYLES DE LA BARRE D'ICÔNES EXISTANTE */
-.sidebar-header.icons-bar {
-    display: flex;
-    justify-content: space-around; 
-    align-items: center;
-    padding: 10px 0; 
-    border-bottom: 1px solid #eee;
-    background-color: #f7f7f7;
-}
-/* ... (Le reste du CSS reste le même) ... */
-
-.icon-item {
-    font-size: 1.5rem;
-    padding: 8px;
-    cursor: pointer;
-    color: #7f8c8d;
-    transition: color 0.2s, background-color 0.2s;
-    border-radius: 5px;
+.dropdown-icon {
+    font-size: 16px;
+    color: #64748b;
 }
 
-.icon-item:hover {
-    color: #3498db;
-    background-color: #ecf0f1;
-}
-
-.discussion-list {
-    flex-grow: 1;
-    overflow-y: auto; 
-}
-.discussion-item {
-    display: flex;
-    padding: 15px 20px;
-    cursor: pointer;
-    border-bottom: 1px solid #f2f2f2;
-    transition: background-color 0.1s;
-}
-
-.discussion-item:hover {
-    background-color: #f5f5f5;
-}
-
-.discussion-item.active {
-    background-color: #ebebeb; 
-}
-
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #3498db;
-    color: white;
-    text-align: center;
-    line-height: 40px;
-    font-weight: bold;
-    margin-right: 15px;
-}
-
-.info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.contact-name {
-    font-weight: 600;
-    margin: 0;
-}
-
-.last-message {
-    color: #888;
-    font-size: 0.9em;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* ----------------------------------- */
-/* 2. CHAT AREA (Discussion active) */
-/* ----------------------------------- */
-.chat-area {
-    display: grid;
-    /* Structure de la zone de chat : Header, Messages, Input */
-    grid-template-rows: auto 1fr auto; 
-    height: 100%;
-}
-
-.chat-header {
-    padding: 15px 20px;
-    background-color: #ffffff;
-    border-bottom: 1px solid #ddd;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
-}
-
-/* Conteneur des messages (zone défilante) */
-.messages-container {
-    padding: 20px;
-    overflow-y: auto;
-    background-color: #e5ddd5; /* Couleur classique de fond de chat */
-}
-
-/* Bourse de message */
-.message-bubble {
-    max-width: 60%;
-    padding: 10px 15px;
-    border-radius: 18px;
-    margin-bottom: 10px;
-    line-height: 1.4;
-    clear: both; /* Pour gérer l'alignement flottant */
-}
-
-.message-bubble.other {
-    background-color: #ffffff;
-    float: left;
-}
-
-.message-bubble.self {
-    background-color: #dcf8c6; /* Couleur envoyée par soi-même */
-    float: right;
-}
-
-/* ----------------------------------- */
-/* INPUT AREA */
-/* ----------------------------------- */
-.input-area {
-    display: flex;
-    padding: 10px 20px;
-    background-color: #f0f0f0;
-    border-top: 1px solid #ddd;
-}
-
-.chat-input {
-    flex-grow: 1;
-    padding: 10px 15px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    margin-right: 10px;
-    font-size: 1em;
-}
-
-.send-button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.send-button:hover {
-    background-color: #2980b9;
-}
-
-/* MODE RECHERCHE DANS LE HEADER */
-.sidebar-header.search-mode {
+.search-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 15px;
-    background-color: #fff;
+    gap: 12px;
 }
 
 .back-btn {
-    background: none;
+    width: 36px;
+    height: 36px;
     border: none;
+    background: #f1f5f9;
+    border-radius: 50%;
     cursor: pointer;
-    color: #3498db;
     display: flex;
     align-items: center;
-    padding: 5px;
-    border-radius: 50%;
-    transition: background-color 0.2s;
+    justify-content: center;
+    transition: all 0.2s ease;
+    color: #64748b;
 }
 
 .back-btn:hover {
-    background-color: #f0f2f5;
+    background: #3b82f6;
+    color: white;
 }
 
-.search-friend-input {
-    flex-grow: 1;
-    padding: 8px 12px;
-    border-radius: 20px;
-    border: 1px solid #ddd;
-    background-color: #f0f2f5;
+.back-icon {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.search-container {
+    flex: 1;
+}
+
+.search-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    color: #334155;
+}
+
+.search-input:focus {
     outline: none;
-    font-size: 0.95rem;
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.search-friend-input:focus {
-    border-color: #3498db;
-    background-color: #fff;
+.search-input::placeholder {
+    color: #94a3b8;
+}
+
+.requests-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+/* ===== CONTACTS LIST ===== */
+.contacts-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+}
+
+.contact-item:hover {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}
+
+.contact-item-active {
+    background: #eff6ff;
+    border-left: 3px solid #3b82f6;
+}
+
+.contact-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #3b82f6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.contact-avatar-purple {
+    background: #8b5cf6;
+}
+
+.contact-avatar-group {
+    background: #f59e0b;
+}
+
+.contact-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.contact-name {
+    font-weight: 500;
+    color: #1e293b;
+    font-size: 14px;
+}
+
+.contact-meta {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.add-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #10b981;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.add-btn:hover {
+    background: #059669;
+    transform: scale(1.05);
+}
+
+.request-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.accept-btn, .refuse-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.accept-btn {
+    background: #10b981;
+    color: white;
+}
+
+.accept-btn:hover {
+    background: #059669;
+    transform: scale(1.05);
+}
+
+.refuse-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.refuse-btn:hover {
+    background: #dc2626;
+    transform: scale(1.05);
+}
+
+/* ===== CHAT MAIN ===== */
+.chat-main {
+    background: #ffffff;
+    display: flex;
+}
+
+.empty-chat {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: #f8fafc;
+}
+
+.empty-chat-content {
+    text-align: center;
+    max-width: 400px;
+}
+
+.empty-chat-icon {
+    font-size: 64px;
+    margin-bottom: 24px;
+    color: #cbd5e1;
+}
+
+.empty-chat h2 {
+    font-size: 24px;
+    color: #1e293b;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.empty-chat p {
+    color: #64748b;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+
+.chat-header-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.chat-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.chat-avatar-friend {
+    background: #3b82f6;
+}
+
+.chat-avatar-group {
+    background: #f59e0b;
+}
+
+.chat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.chat-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.chat-status, .chat-meta {
+    font-size: 13px;
+    color: #10b981;
+}
+
+.chat-meta {
+    color: #64748b;
+}
+
+.add-member-btn {
+    padding: 10px 20px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.add-member-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.2);
+}
+
+.add-icon {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* ===== MESSAGES AREA ===== */
+.messages-area {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    background: #f8fafc;
+    background-image: 
+        radial-gradient(#e2e8f0 1px, transparent 1px),
+        radial-gradient(#e2e8f0 1px, transparent 1px);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+}
+
+.empty-messages {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 15px;
+    padding: 40px;
+}
+
+.group-info {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.group-members-count {
+    color: #64748b;
+    font-size: 15px;
+}
+
+/* ===== MESSAGE INPUT ===== */
+.message-input-container {
+    padding: 20px 24px;
+    border-top: 1px solid #e2e8f0;
+    background: #ffffff;
+    display: flex;
+    gap: 12px;
+}
+
+.message-input {
+    flex: 1;
+    padding: 14px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: #f8fafc;
+    color: #1e293b;
+}
+
+.message-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.message-input::placeholder {
+    color: #94a3b8;
+}
+
+.send-btn {
+    padding: 0 24px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.send-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.2);
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.modal {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    animation: modalSlideIn 0.2s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f1f5f9;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    color: #64748b;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-subtitle {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.friends-list-modal {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.no-friends {
+    text-align: center;
+    color: #94a3b8;
+    padding: 40px 20px;
+    font-size: 14px;
+}
+
+.friend-item-modal {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    transition: background 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.friend-item-modal:hover {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}
+
+.friend-avatar-modal {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #3b82f6;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.friend-name-modal {
+    flex: 1;
+    font-size: 14px;
+    color: #334155;
+    font-weight: 500;
+}
+
+.add-friend-btn-modal {
+    padding: 6px 16px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.add-friend-btn-modal:hover {
+    background: #059669;
+    transform: translateY(-1px);
+}
+
+.modal-footer {
+    padding: 16px 24px 24px;
+    border-top: 1px solid #e2e8f0;
+    text-align: right;
+}
+
+.cancel-btn {
+    padding: 10px 24px;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+/* ===== SCROLLBAR ===== */
+.contacts-list::-webkit-scrollbar,
+.messages-area::-webkit-scrollbar,
+.friends-list-modal::-webkit-scrollbar {
+    width: 6px;
+}
+
+.contacts-list::-webkit-scrollbar-track,
+.messages-area::-webkit-scrollbar-track,
+.friends-list-modal::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.contacts-list::-webkit-scrollbar-thumb,
+.messages-area::-webkit-scrollbar-thumb,
+.friends-list-modal::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.contacts-list::-webkit-scrollbar-thumb:hover,
+.messages-area::-webkit-scrollbar-thumb:hover,
+.friends-list-modal::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.message-bubble {
+    max-width: 70%;
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    position: relative;
+    font-size: 14px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+/* Mes messages (Alignés à droite, fond coloré) */
+.message-self {
+    align-self: flex-end; /* Pour flexbox colonne si container en flex, sinon float right */
+    margin-left: auto; /* Pousse à droite */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom-right-radius: 2px;
+}
+
+/* Les autres (Alignés à gauche, fond blanc/gris) */
+.message-other {
+    align-self: flex-start;
+    margin-right: auto;
+    background: white;
+    color: #333;
+    border-bottom-left-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.message-author {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #667eea;
+}
+
+.message-self .message-author {
+    display: none; /* On cache mon propre nom */
+}
+
+.message-text {
+    margin-bottom: 4px;
+}
+
+.message-time {
+    font-size: 10px;
+    opacity: 0.7;
+    text-align: right;
 }

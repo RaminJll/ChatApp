@@ -6,8 +6,8 @@ import { AuthController } from '../controllers/AuthController';
 const router: Router = Router();
 const authController = new AuthController();
 
-router.post('/inscription', authController.register);
+router.post('/sign-up', authController.register);
 
-router.post('/connexion', authController.login);
+router.post('/login', authController.login);
 
 export default router;
