@@ -18,7 +18,7 @@ export class GroupsController {
 
       const newGroup = await groupsService.createGroupService(name, creatorId);
 
-      return res.status(201).json({ message: "Groupe créé !", data: newGroup });
+      return res.status(201).json({ message: "Groupe créé !"});
     } catch (error: any) {
       return res.status(500).json({ error: "Erreur lors de la création du groupe" });
     }
@@ -37,7 +37,7 @@ export class GroupsController {
     }
   }
 
-  // POST: Ajouter un membre
+  // Ajouter un membre
   async addMember(req: AuthRequest, res: Response) {
     try {
       const requesterId = req.userId; 
@@ -48,12 +48,25 @@ export class GroupsController {
         return res.status(400).json({ error: "ID du groupe et de l'utilisateur requis" });
       }
 
-      await groupsService.addMemberToGroupService(groupId, userIdToAdd, requesterId);
+      const newMember = await groupsService.addMemberToGroupService(groupId, userIdToAdd, requesterId);
 
       return res.status(200).json({ message: "Ami ajouté au groupe avec succès !" });
 
     } catch (error: any) {
       return res.status(400).json({ error: error.message });
+    }
+  }
+
+  // Afficher les membres du groupe
+  async getGroupMembers(req: AuthRequest, res: Response) {
+    try {
+      const { groupId } = req.params;
+      if (!groupId) return res.status(400).json({ error: "ID du groupe requis" });
+
+      const members = await groupsService.getGroupMembersService(groupId);
+      return res.status(200).json(members);
+    } catch (error: any) {
+      return res.status(500).json({ error: "Erreur récupération des membres du groupe" });
     }
   }
 }

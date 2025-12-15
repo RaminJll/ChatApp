@@ -1,4 +1,7 @@
 // server/src/app.ts
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import express, { Application } from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io'; 

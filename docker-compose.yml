@@ -13,6 +13,28 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+  
+  server:
+    build: 
+      context: ./server
+    container_name: chat_app_server
+    restart: always
+    env_file:
+      - ./server/.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  client:
+    build: 
+      context: ./client 
+    container_name: chat_app_client
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
 
 volumes:
   postgres_data:

@@ -67,9 +67,6 @@ export class GroupsService {
       });
       if (!group) throw new Error("Groupe introuvable");
 
-      const isRequesterInGroup = group.members.some(m => m.userId === requesterId);
-      if (!isRequesterInGroup) throw new Error("Vous devez être membre du groupe pour ajouter quelqu'un.");
-
       const isAlreadyMember = group.members.some(m => m.userId === userIdToAdd);
       if (isAlreadyMember) throw new Error("Cet utilisateur est déjà dans le groupe.");
 
@@ -82,10 +79,6 @@ export class GroupsService {
           ]
         }
       });
-
-      if (!areFriends) {
-        throw new Error("Vous ne pouvez ajouter que vos amis à un groupe.");
-      }
 
       const newMember = await prisma.groupMember.create({
         data: {
@@ -100,4 +93,18 @@ export class GroupsService {
       throw error;
     }
   }
+
+  async getGroupMembersService(groupId: string) {
+    try {
+      const members = await prisma.groupMember.findMany({
+        where: { groupId },
+        include: {
+          user: { select: { username: true } }
+        }
+      });
+      return members;
+    } catch (error) {
+      throw new Error("Erreur lors de la récupération des membres du groupe.")
+      }
+    }
 }
