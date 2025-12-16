@@ -15,4 +15,7 @@ router.get('/list', authenticateToken, groupsController.getMyGroups);
 // Ajouter un membre (ex: via un bouton "Ajouter au groupe")
 router.post('/add-member', authenticateToken, groupsController.addMember);
 
+// Récupérer les membres d'un groupe
+router.get('/members/:groupId', authenticateToken, groupsController.getGroupMembers);
+
 export default router;

@@ -5,6 +5,9 @@ export interface GroupMember {
     groupId: string;
     role: 'ADMIN' | 'MEMBER';
     joinedAt: string;
+    user?: {
+        username: string;
+    };
 }
 
 export interface Group {

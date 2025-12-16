@@ -93,7 +93,8 @@ export class GroupsService {
       throw error;
     }
   }
-
+  
+  // Récupérer les membres d'un groupe
   async getGroupMembersService(groupId: string) {
     try {
       const members = await prisma.groupMember.findMany({

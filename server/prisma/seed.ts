@@ -4,7 +4,6 @@ import bcrypt from 'bcrypt'
 const prisma = new PrismaClient()
 
 async function main() {
-  // Nettoyage (ordre IMPORTANT)
   await prisma.message.deleteMany()
   await prisma.groupMember.deleteMany()
   await prisma.group.deleteMany()
@@ -12,10 +11,8 @@ async function main() {
   await prisma.friendship.deleteMany()
   await prisma.user.deleteMany()
 
-  // -----------------------
   // USERS
-  // -----------------------
-  const password = await bcrypt.hash('password123', 10)
+  const password = await bcrypt.hash('password123.', 10)
 
   const users = await Promise.all(
     Array.from({ length: 10 }).map((_, i) =>
@@ -29,9 +26,7 @@ async function main() {
     )
   )
 
-  // -----------------------
   // FRIENDSHIPS
-  // -----------------------
   await prisma.friendship.createMany({
     data: [
       {
@@ -52,9 +47,7 @@ async function main() {
     ],
   })
 
-  // -----------------------
   // DIRECT MESSAGES
-  // -----------------------
   const dm1 = await prisma.directMessage.create({
     data: {
       user1Id: users[0].id,
@@ -69,9 +62,7 @@ async function main() {
     },
   })
 
-  // -----------------------
   // DM MESSAGES
-  // -----------------------
   await prisma.message.createMany({
     data: [
       {
@@ -92,9 +83,7 @@ async function main() {
     ],
   })
 
-  // -----------------------
   // GROUPES
-  // -----------------------
   const group1 = await prisma.group.create({
     data: {
       name: 'Groupe Dev',
@@ -109,9 +98,7 @@ async function main() {
     },
   })
 
-  // -----------------------
   // GROUP MEMBERS
-  // -----------------------
   await prisma.groupMember.createMany({
     data: [
       { userId: users[0].id, groupId: group1.id, role: 'ADMIN' },
@@ -124,9 +111,7 @@ async function main() {
     ],
   })
 
-  // -----------------------
   // GROUP MESSAGES
-  // -----------------------
   await prisma.message.createMany({
     data: [
       {
@@ -135,26 +120,17 @@ async function main() {
         groupId: group1.id,
       },
       {
-        content: 'Salut tout le monde 👋',
+        content: 'Salut tout le monde',
         authorId: users[1].id,
         groupId: group1.id,
       },
       {
-        content: 'Let’s play 🎮',
+        content: 'Let’s play',
         authorId: users[3].id,
         groupId: group2.id,
       },
     ],
   })
 
-  console.log('✅ Seed COMPLET exécuté')
+  console.log('Seed COMPLET exécuté')
 }
-
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
