@@ -1,5 +1,5 @@
 // src/pages/HomePage.tsx
-import { useState, useEffect, useRef, type ChangeEvent, type KeyboardEvent } from 'react';
+import { useState, useEffect, type ChangeEvent, type KeyboardEvent } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 // Services

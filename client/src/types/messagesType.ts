@@ -12,9 +12,8 @@ export interface Message {
     authorId: string;
     author: MessageAuthor;
     
-    // ⬇️ AJOUTS INDISPENSABLES
-    groupId?: string | null;         // Pour identifier si c'est un message de groupe
-    directMessageId?: string | null; // Pour identifier la conversation privée (optionnel mais utile)
+    groupId?: string | null;
+    directMessageId?: string | null;
 }
 
 export interface SendMessagePayload {

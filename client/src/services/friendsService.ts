@@ -47,6 +47,7 @@ export const refuseFriendRequestApi = async (senderId: string) => {
   return response.data;
 };
 
+// Récupérer la liste d'amis
 export const getFriendsListApi = async (): Promise<User[]> => {
   const response = await axios.get<User[]>(
     '/api/friends/list',

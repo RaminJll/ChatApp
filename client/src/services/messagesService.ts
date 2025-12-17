@@ -7,8 +7,6 @@ const getAuthHeader = () => {
     return { Authorization: `Bearer ${token}` };
 };
 
-// MESSAGERIE PRIVÉE
-
 // Envoyer un message privé
 export const sendDirectMessageApi = async (receiverId: string, content: string): Promise<Message> => {
     const response = await axios.post<Message>(
@@ -27,8 +25,6 @@ export const getDirectMessagesApi = async (contactId: string): Promise<Message[]
     );
     return response.data;
 };
-
-// MESSAGERIE GROUPE
 
 // Envoyer un message de groupe
 export const sendGroupMessageApi = async (groupId: string, content: string): Promise<Message> => {
