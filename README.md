@@ -1,6 +1,6 @@
 # AppChat - Application de Messagerie Instantanée
 
-Une application web de chat en temps réel similaire à WhatsApp, développée avec une stack moderne et conteneurisée avec Docker.
+Une application web de messagerie instantanée, développée avec une stack moderne et conteneurisée avec Docker.
 
 ---
 
@@ -34,21 +34,20 @@ Une application web de chat en temps réel similaire à WhatsApp, développée a
 ### Backend
 
 - **Node.js** avec **Express** en **TypeScript**
-- **Socket.IO** pour la communication en temps réel
-- **Prisma** ORM pour la base de données
-- **PostgreSQL** comme base de données
-- **JWT** pour l'authentification
+- **Socket.IO**
+- **Prisma**
+- **PostgreSQL**
 
 ### Frontend
 
 - **React** en **TypeScript**
-- **Socket.IO Client** pour la communication en temps réel
-- **Context API** pour la gestion d'état
+- **Socket.IO Client**
+- **Tailwind css**
 
 ### DevOps
 
-- **Docker** & **Docker Compose** pour la conteneurisation
-- **PostgreSQL** conteneurisé
+- **Docker** & **Docker Compose**
+- **PostgreSQL**
 
 ---
 
@@ -64,3 +63,25 @@ Une application web de chat en temps réel similaire à WhatsApp, développée a
 ```bash
 git clone https://github.com/RaminJll/ChatApp.git
 ```
+
+### 2. Créer le fichier .env
+```bash
+cp server/.env.example server/.env
+```
+
+### 3. Lancer Docker
+```bash
+docker-compose up --build
+```
+
+---
+
+### Accès à l'application
+
+- **Application Web** : http://localhost:5173
+- **API Backend** : http://localhost:3000
+
+### Utilisateurs de test
+
+- **Emails** : user1@example.com à user10@example.com
+- **Mot de passe** : password123.
