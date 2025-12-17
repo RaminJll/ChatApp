@@ -7,7 +7,8 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        //target: 'http://localhost:3000', (pour dev local)
+        target: 'http://server:3000', // (pour docker-compose)
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },

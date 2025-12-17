@@ -4,8 +4,6 @@ import prisma from '../lib/prisma';
 
 export class MessagesService {
 
-  // --- MESSAGERIE PRIVÉE (1 to 1) ---
-
   // Envoyer un message privé
   async sendDirectMessage(senderId: string, receiverId: string, content: string) {
     let conversation = await prisma.directMessage.findFirst({
@@ -64,8 +62,6 @@ export class MessagesService {
     return messages;
   }
 
-
-  // --- MESSAGERIE DE GROUPE ---
 
   // Envoyer un message de groupe
   async sendGroupMessage(senderId: string, groupId: string, content: string) {

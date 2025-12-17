@@ -2,6 +2,7 @@
 
 import prisma from '../lib/prisma';
 
+// Retrouver tous les utilisateurs
 export class UserService {
     async allUsersService() {
         try {

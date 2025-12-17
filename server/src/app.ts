@@ -14,13 +14,12 @@ import messagesRoutes from './routes/messages';
 
 const app: Application = express();
 
-// 3. Créer le serveur HTTP à partir d'Express
 const httpServer = createServer(app);
 
-// 4. Initialiser Socket.io
+// Mise en place de Socket.io
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173", // L'URL de ton Front-end (Vite)
+    origin: "http://localhost:5173",
     methods: ["GET", "POST"]
   }
 });
@@ -28,8 +27,7 @@ const io = new Server(httpServer, {
 app.set('io', io);
 
 io.on('connection', (socket) => {
-  console.log('Un utilisateur est connecté via Socket:', socket.id);
-
+  
   // L'utilisateur rejoint une "salle" à son nom
   socket.on('join_user_room', (userId) => {
     socket.join(userId);

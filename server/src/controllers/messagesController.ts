@@ -7,7 +7,8 @@ const messagesService = new MessagesService();
 
 export class MessagesController {
 
-async sendDM(req: AuthRequest, res: Response) {
+  // Envoyer un message privé
+  async sendDM(req: AuthRequest, res: Response) {
     try {
       const senderId = req.userId;
       const { receiverId, content } = req.body;
@@ -18,7 +19,7 @@ async sendDM(req: AuthRequest, res: Response) {
       const message = await messagesService.sendDirectMessage(senderId, receiverId, content);
 
       const io = req.app.get('io');
-      
+
       io.to(receiverId).emit('receive_message', message);
       io.to(senderId).emit('receive_message', message);
 
@@ -28,6 +29,7 @@ async sendDM(req: AuthRequest, res: Response) {
     }
   }
 
+  // Récupérer l'historique privé
   async getDMs(req: AuthRequest, res: Response) {
     try {
       const userId = req.userId;
@@ -42,6 +44,7 @@ async sendDM(req: AuthRequest, res: Response) {
     }
   }
 
+  // Envoyer un message de groupe
   async sendGroupMsg(req: AuthRequest, res: Response) {
     try {
       const senderId = req.userId;
@@ -61,6 +64,7 @@ async sendDM(req: AuthRequest, res: Response) {
     }
   }
 
+  // Récupérer l'historique de groupe
   async getGroupMsgs(req: AuthRequest, res: Response) {
     try {
       const { groupId } = req.params;

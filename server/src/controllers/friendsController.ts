@@ -7,6 +7,8 @@ import { FriendsService } from '../services/friendsService';
 const friendsService = new FriendsService();
 
 export class FriendsController {
+
+  // Envoyer une demande d'ami
   async sendRequest(req: AuthRequest, res: Response) {
     try {
       const senderId = req.userId;
@@ -35,6 +37,7 @@ export class FriendsController {
     }
   }
 
+  // Récupérer les demandes d'ami reçues
   async getReceivedRequests(req: AuthRequest, res: Response) {
     try {
       const userId = req.userId;
@@ -48,6 +51,7 @@ export class FriendsController {
     }
   }
 
+  // Accepter une demande d'ami
   async acceptRequest(req: AuthRequest, res: Response) {
     try {
       const receiverId = req.userId;
@@ -63,6 +67,7 @@ export class FriendsController {
     }
   }
 
+  // Refuser une demande d'ami
   async refuseRequest(req: AuthRequest, res: Response) {
     try {
       const receiverId = req.userId;
@@ -77,7 +82,7 @@ export class FriendsController {
       return res.status(400).json({ error: error.message });
     }
   }
-
+  // Récupérer la liste d'amis
   async getFriends(req: AuthRequest, res: Response) {
     try {
       const userId = req.userId;

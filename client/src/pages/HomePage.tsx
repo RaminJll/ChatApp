@@ -4,24 +4,9 @@ import { io, Socket } from 'socket.io-client';
 
 // Services
 import { getAllUsersService } from '../services/usersService';
-import {
-    sendFriendRequestApi,
-    getReceivedRequestsApi,
-    acceptFriendRequestApi,
-    refuseFriendRequestApi,
-    getFriendsListApi
-} from '../services/friendsService';
-import {
-    createGroupApi,
-    getUserGroupsApi,
-    addMemberToGroupApi
-} from '../services/groupsService';
-import {
-    getDirectMessagesApi,
-    sendDirectMessageApi,
-    getGroupMessagesApi,
-    sendGroupMessageApi
-} from '../services/messagesService';
+import {sendFriendRequestApi, getReceivedRequestsApi, acceptFriendRequestApi, refuseFriendRequestApi, getFriendsListApi} from '../services/friendsService';
+import {createGroupApi, getUserGroupsApi, addMemberToGroupApi} from '../services/groupsService';
+import {getDirectMessagesApi, sendDirectMessageApi, getGroupMessagesApi, sendGroupMessageApi} from '../services/messagesService';
 
 // Types
 import type { User } from '../types/userType';
@@ -34,13 +19,11 @@ import { useNavigate } from 'react-router-dom';
 export default function HomePage() {
     const navigate = useNavigate();
 
-    // --- ÉTATS (STATE) ---
+    // View Mode 
     const [viewMode, setViewMode] = useState<'default' | 'search' | 'requests' | 'groups'>('default');
 
-    // UI States
     const [showAddFriendMenu, setShowAddFriendMenu] = useState(false);
     const [showAddMemberModal, setShowAddMemberModal] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [messageInput, setMessageInput] = useState('');
 
     // Data States
@@ -52,30 +35,32 @@ export default function HomePage() {
     const [groupsList, setGroupsList] = useState<Group[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
 
-    console.log('Groups List:', groupsList);
-
     // Selection States
     const [selectedFriend, setSelectedFriend] = useState<User | null>(null);
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
 
     // Refs & Socket
-    const messagesEndRef = useRef<HTMLDivElement>(null);
     const [socket, setSocket] = useState<Socket | null>(null);
 
     // User Info
     const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     const currentUserId = currentUser.id || '';
 
-    // --- 1. INITIALISATION & SOCKET ---
-    useEffect(() => {
-        fetchFriends();
-        // On charge aussi les groupes au démarrage pour avoir les notifs (optionnel)
-        // fetchGroups(); 
-    }, []);
+    // Deconnexion
+    const handleLogout = () => {
+        if (socket) {
+            socket.disconnect();
+        }
+
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+
+        navigate('/connexion');
+    };
 
     useEffect(() => {
         const newSocket = io('http://localhost:3000', {
-            auth: { token: localStorage.getItem('token') } // Si ton back vérifie le token socket
+            auth: { token: localStorage.getItem('token') }
         });
         setSocket(newSocket);
 
@@ -108,31 +93,17 @@ export default function HomePage() {
             );
 
             if (isForCurrentGroup || isForCurrentFriend) {
-                setMessages((prev) => [...prev, newMessage]);
-                scrollToBottom();
+                setMessages((prevMessages) => {
+                    const newMessagesArray = [...prevMessages];
+                    newMessagesArray.push(newMessage);
+                    return newMessagesArray;
+                });
             }
         };
 
         socket.on('receive_message', handleReceiveMessage);
         return () => { socket.off('receive_message', handleReceiveMessage); };
     }, [socket, selectedGroup, selectedFriend, currentUserId]);
-
-    const scrollToBottom = () => {
-        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-    };
-
-    const handleLogout = () => {
-        if (socket) {
-            socket.disconnect();
-        }
-
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-
-        navigate('/connexion');
-    };
-
-    // --- 2. LOGIQUE MESSAGES ---
 
     // Charger l'historique quand on change de sélection
     useEffect(() => {
@@ -143,22 +114,25 @@ export default function HomePage() {
         }
     }, [selectedFriend, selectedGroup]);
 
+    // charger l'historique des messages privés
     const loadDirectMessages = async (friendId: string) => {
         try {
             const msgs = await getDirectMessagesApi(friendId);
             setMessages(msgs);
-            scrollToBottom();
-        } catch (error) { console.error(error); }
+        } catch (error) { 
+            console.error(error); 
+        }
     };
 
+    // charger l'historique des messages de groupe
     const loadGroupMessages = async (groupId: string) => {
         try {
             const msgs = await getGroupMessagesApi(groupId);
             setMessages(msgs);
-            scrollToBottom();
         } catch (error) { console.error(error); }
     };
 
+    // Gerer l'envoi de message
     const handleSendMessage = async () => {
         if (!messageInput.trim()) return;
         try {
@@ -168,28 +142,24 @@ export default function HomePage() {
                 await sendGroupMessageApi(selectedGroup.id, messageInput);
             }
             setMessageInput('');
-            // Le message est ajouté via le socket 'receive_message' ou on pourrait l'ajouter ici manuellement
         } catch (error) {
             console.error(error);
             alert("Erreur lors de l'envoi");
         }
     };
 
-    // --- 3. LOGIQUE GROUPES ---
-
+    // Afficher le mode groupes
     const showGroupsMode = async () => {
         setViewMode('groups');
-        setIsLoading(true);
         try {
             const groups = await getUserGroupsApi();
             setGroupsList(groups);
         } catch (error) {
             console.error(error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
+    // Créer un nouveau groupe
     const handleCreateGroup = async () => {
         const groupName = prompt("Nom du nouveau groupe :");
         if (!groupName?.trim()) return;
@@ -198,48 +168,61 @@ export default function HomePage() {
             await createGroupApi(groupName);
             alert("Groupe créé avec succès !");
             setShowAddFriendMenu(false);
-            showGroupsMode(); // Recharger la liste et basculer la vue
+            showGroupsMode();
         } catch (error) {
             alert("Erreur lors de la création du groupe");
         }
     };
 
+    // Gérer le clic sur un groupe
     const handleGroupClick = (group: Group) => {
         setSelectedGroup(group);
         setSelectedFriend(null);
         setShowAddMemberModal(false);
     };
 
+    // Ajouter un membre au groupe
     const handleAddMember = async (friendId: string, friendName: string) => {
         if (!selectedGroup) return;
         try {
             await addMemberToGroupApi(selectedGroup.id, friendId);
             alert(`${friendName} a été ajouté au groupe !`);
             setShowAddMemberModal(false);
-            showGroupsMode(); // Le plus simple est de recharger les groupes pour avoir les données à jour
+            showGroupsMode();
         } catch (error: any) {
             alert(error.response?.data?.error || "Erreur lors de l'ajout");
         }
     };
 
-    // --- 4. LOGIQUE AMIS & RECHERCHE (Legacy) ---
-
+    // Charger la liste des amis
     const fetchFriends = async () => {
-        try { setFriendsList(await getFriendsListApi()); } catch (error) { console.error(error); }
+        try {
+            setFriendsList(await getFriendsListApi());
+        }
+        catch (error) {
+            console.error(error);
+        }
     };
 
+    useEffect(() => {
+        fetchFriends();
+    }, []);
+
+    // Démarrer le mode recherche
     const startSearchMode = async () => {
         setShowAddFriendMenu(false);
         setViewMode('search');
         setSearchQuery('');
         setSearchResults([]);
-        setIsLoading(true);
         try {
             const users = await getAllUsersService();
             setAllUsersList(users || []);
-        } finally { setIsLoading(false); }
+        } catch (error) {
+            console.error(error);
+        }
     };
 
+    // Gestion de la recherche
     const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setSearchQuery(query);
@@ -250,27 +233,40 @@ export default function HomePage() {
         }
     };
 
+    // Gestion des demandes d'ami
     const handleSendRequest = async (id: string, name: string) => {
-        try { await sendFriendRequestApi(id); alert(`Demande envoyée à ${name}`); }
-        catch (e: any) { alert(e.response?.data?.error); }
+        try {
+            await sendFriendRequestApi(id); alert(`Demande envoyée à ${name}`);
+        }
+        catch (e: any) {
+            alert(e.response?.data?.error);
+        }
     };
 
+    // Afficher les demandes d'ami reçues
     const showRequestsMode = async () => {
         setViewMode('requests');
-        setIsLoading(true);
-        try { setReceivedRequests(await getReceivedRequestsApi()); }
-        catch (e) { console.error(e); } finally { setIsLoading(false); }
+        try {
+            setReceivedRequests(await getReceivedRequestsApi());
+        }
+        catch (e) {
+            console.error(e);
+        }
     };
 
+    // Accepter une demande
     const handleAccept = async (id: string, name: string) => {
         try {
             await acceptFriendRequestApi(id);
             alert(`${name} est désormais votre ami !`);
             setReceivedRequests(p => p.filter(r => r.senderId !== id));
             fetchFriends();
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error(e);
+        }
     };
 
+    // Refuser une demande
     const handleRefuse = async (id: string) => {
         if (!confirm("Refuser cette demande ?")) return;
         try {
@@ -279,11 +275,13 @@ export default function HomePage() {
         } catch (e) { console.error(e); }
     };
 
+    // Sélectionner un ami
     const handleFriendClick = (friend: User) => {
         setSelectedFriend(friend);
         setSelectedGroup(null);
     };
 
+    // Fermer le mode recherche
     const closeSpecialMode = () => {
         setViewMode('default');
         setSearchQuery('');
@@ -294,12 +292,15 @@ export default function HomePage() {
         if (e.key === 'Enter') handleSendMessage();
     };
 
+    console.log(fetchFriends);
+
+
     // Calcul des amis disponibles pour ajout au groupe (ceux qui ne sont pas déjà dedans)
     const availableFriends = selectedGroup
         ? friendsList.filter(friend => !selectedGroup.members.some(m => String(m.userId) === String(friend.id)))
         : [];
 
-    // --- STYLES UTILS ---
+    // STYLES UTILS
     const iconBtnClass = "w-10 h-10 border-none rounded-xl cursor-pointer flex items-center justify-center text-slate-500 text-lg transition-all hover:bg-blue-500 hover:text-white hover:-translate-y-px hover:shadow-md";
     const activeIconBtnClass = "bg-blue-500 text-white shadow-md";
     const contactItemClass = "flex items-center gap-3 p-3.5 rounded-xl cursor-pointer transition-all mb-2 border border-transparent hover:bg-slate-100 hover:border-slate-200";
@@ -308,12 +309,11 @@ export default function HomePage() {
     return (
         <div className="grid grid-cols-[280px_1fr] h-screen bg-slate-50 font-sans">
 
-            {/* ===== SIDEBAR ===== */}
+            {/* SIDEBAR */}
             <aside className="bg-white border-r border-slate-200 flex flex-col shadow-sm z-50">
                 {(viewMode === 'default' || viewMode === 'groups') ? (
                     <header className="p-5 border-b border-slate-200">
                         <div className="grid grid-cols-4 gap-3">
-                            {/* Bouton Amis */}
                             <button
                                 className={`${iconBtnClass} ${viewMode === 'default' ? activeIconBtnClass : 'bg-slate-100'}`}
                                 onClick={() => setViewMode('default')}
@@ -321,7 +321,6 @@ export default function HomePage() {
                             >
                                 👤
                             </button>
-                            {/* Bouton Groupes */}
                             <button
                                 className={`${iconBtnClass} ${viewMode === 'groups' ? activeIconBtnClass : 'bg-slate-100'}`}
                                 onClick={showGroupsMode}
@@ -329,7 +328,6 @@ export default function HomePage() {
                             >
                                 👥
                             </button>
-                            {/* Bouton Demandes */}
                             <button
                                 className={`${iconBtnClass} bg-slate-100`}
                                 onClick={showRequestsMode}
@@ -338,7 +336,7 @@ export default function HomePage() {
                                 📩
                             </button>
 
-                            {/* Dropdown Ajout */}
+                            {/* BULLE D'AJOUTS */}
                             <div
                                 className="relative"
                                 onMouseEnter={() => setShowAddFriendMenu(true)}
@@ -362,7 +360,6 @@ export default function HomePage() {
                         </div>
                     </header>
                 ) : (
-                    // Header Recherche / Demandes
                     <header className="p-5 border-b border-slate-200 flex items-center gap-3">
                         <button className="w-9 h-9 border-none bg-slate-100 rounded-full cursor-pointer flex items-center justify-center text-slate-500 hover:bg-blue-500 hover:text-white transition-all" onClick={closeSpecialMode} title="Retour">
                             ←
@@ -387,7 +384,7 @@ export default function HomePage() {
                 {/* Liste des contacts */}
                 <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
                     {/* RESULTATS RECHERCHE */}
-                    {viewMode === 'search' && !isLoading && searchResults.map(u => (
+                    {viewMode === 'search' && searchResults.map(u => (
                         <div key={u.id} className={contactItemClass}>
                             <div className="w-10 h-10 rounded-xl bg-blue-500 text-white flex items-center justify-center font-bold text-lg">
                                 {u.username[0].toUpperCase()}
@@ -405,7 +402,7 @@ export default function HomePage() {
                     ))}
 
                     {/* DEMANDES REÇUES */}
-                    {viewMode === 'requests' && !isLoading && receivedRequests.map(r => (
+                    {viewMode === 'requests' && receivedRequests.map(r => (
                         <div key={r.senderId} className={contactItemClass}>
                             <div className="w-10 h-10 rounded-xl bg-purple-500 text-white flex items-center justify-center font-bold text-lg">
                                 {r.sender.username[0].toUpperCase()}
@@ -438,7 +435,6 @@ export default function HomePage() {
 
                     {/* LISTE GROUPES */}
                     {viewMode === 'groups' && groupsList.map(g => (
-                        console.log(g),
                         <div
                             key={g.id}
                             className={`${contactItemClass} ${selectedGroup?.id === g.id ? activeContactItemClass : ''}`}
@@ -464,10 +460,10 @@ export default function HomePage() {
                 </div>
             </aside>
 
-            {/* ===== CHAT MAIN ===== */}
+            {/* CHAT MAIN */}
             <main className="bg-white flex flex-col h-full relative">
 
-                {/* 1. VUE AMI SÉLECTIONNÉ */}
+                {/* VUE AMI SÉLECTIONNÉ */}
                 {selectedFriend ? (
                     <div className="flex-1 flex flex-col h-full">
                         <header className="p-5 border-b border-slate-200 bg-white flex items-center justify-between">
@@ -484,26 +480,21 @@ export default function HomePage() {
 
                         <div className="flex-1 p-6 overflow-y-auto bg-slate-50 relative scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
                             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-
-                            {messages.length === 0 ? (
-                                <div className="text-center text-slate-400 text-sm py-10 relative z-10"><p>Aucun message. Dites bonjour ! 👋</p></div>
-                            ) : (
-                                messages.map(msg => {
-                                    const isMe = String(msg.authorId) === String(currentUserId);
-                                    return (
-                                        <div key={msg.id} className={`max-w-[70%] mb-3 p-3 rounded-2xl relative text-sm leading-relaxed break-words z-10 ${isMe
-                                            ? 'self-end ml-auto bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-br-sm'
-                                            : 'self-start mr-auto bg-white text-slate-800 rounded-bl-sm shadow-sm border border-slate-100'
-                                            }`}>
-                                            <div className="mb-1">{msg.content}</div>
-                                            <div className={`text-[10px] text-right ${isMe ? 'opacity-70' : 'text-slate-400'}`}>
-                                                {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                            </div>
+                            {messages.map(msg => {
+                                const isMe = String(msg.authorId) === String(currentUserId);
+                                return (
+                                    <div key={msg.id} className={`max-w-[70%] mb-3 p-3 rounded-2xl relative text-sm leading-relaxed break-words z-10 ${isMe
+                                        ? 'self-end ml-auto bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-br-sm'
+                                        : 'self-start mr-auto bg-white text-slate-800 rounded-bl-sm shadow-sm border border-slate-100'
+                                        }`}>
+                                        <div className="mb-1">{msg.content}</div>
+                                        <div className={`text-[10px] text-right ${isMe ? 'opacity-70' : 'text-slate-400'}`}>
+                                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                         </div>
-                                    );
-                                })
-                            )}
-                            <div ref={messagesEndRef} />
+                                    </div>
+                                );
+                            })}
+                            <div/>
                         </div>
 
                         <div className="p-5 border-t border-slate-200 bg-white flex gap-3">
@@ -520,7 +511,6 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    // 2. VUE GROUPE SÉLECTIONNÉ
                 ) : selectedGroup ? (
                     <div className="flex-1 flex flex-col h-full">
                         <header className="p-5 border-b border-slate-200 bg-white flex items-center justify-between">
@@ -565,7 +555,7 @@ export default function HomePage() {
                                     );
                                 })
                             )}
-                            <div ref={messagesEndRef} />
+                            <div/>
                         </div>
 
                         <div className="p-5 border-t border-slate-200 bg-white flex gap-3">
@@ -581,7 +571,7 @@ export default function HomePage() {
                             </button>
                         </div>
 
-                        {/* MODAL AJOUT MEMBRE */}
+                        {/* AJOUT MEMBRE */}
                         {showAddMemberModal && (
                             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[1000]">
                                 <div className="bg-white rounded-2xl w-[90%] max-w-[500px] shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
@@ -613,8 +603,6 @@ export default function HomePage() {
                             </div>
                         )}
                     </div>
-
-                    // 3. VUE PAR DÉFAUT (RIEN SÉLECTIONNÉ)
                 ) : (
                     <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 p-10 text-center">
                         <div className="text-6xl mb-6 text-slate-300">💬</div>

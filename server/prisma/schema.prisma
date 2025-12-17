@@ -16,7 +16,7 @@ generator client {
 model User {
   id             String    @id @default(cuid())
   email          String    @unique
-  password       String    // Hash du mot de passe
+  password       String
   username       String    @unique
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -35,11 +35,8 @@ model User {
   groupMemberships GroupMember[] 
 }
 
-// =========================================================
-// MODÈLE 2: GESTION DES AMIS (Friendship)
-// =========================================================
+// GESTION DES AMIS (Friendship)
 
-// Table Many-to-Many qui gère les demandes et le statut d'ami
 model Friendship {
   senderId    String
   receiverId  String
@@ -48,6 +45,7 @@ model Friendship {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
+  // Relations
   sender      User    @relation("SentFriendRequests", fields: [senderId], references: [id])
   receiver    User    @relation("ReceivedFriendRequests", fields: [receiverId], references: [id])
   
@@ -55,11 +53,8 @@ model Friendship {
 }
 
 
-// =========================================================
-// MODÈLE 3: CONVERSATION PRIVÉE (DirectMessage - P2P Stricte)
-// =========================================================
+// CONVERSATION PRIVÉE (DirectMessage - P2P Stricte)
 
-// Une conversation entre EXACTEMENT deux utilisateurs.
 model DirectMessage {
   id             String    @id @default(cuid())
   
@@ -69,38 +64,35 @@ model DirectMessage {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   
+  // Relations
   user1          User      @relation("User1DMs", fields: [user1Id], references: [id])
   user2          User      @relation("User2DMs", fields: [user2Id], references: [id])
   messages       Message[] @relation("DM_Messages")
   
-  // Clé unique pour garantir qu'une seule DM existe entre deux utilisateurs,
-  // quelle que soit l'ordre de user1Id et user2Id (cette vérification sera faite par votre code Express)
   @@unique([user1Id, user2Id]) 
 }
 
-// =========================================================
-// MODÈLE 4: SALONS DE GROUPE (Group Chat)
-// =========================================================
+// SALONS DE GROUPE (Group Chat)
 
-// La table principale du groupe
 model Group {
   id             String    @id @default(cuid())
   name           String
   creatorId      String
   createdAt      DateTime  @default(now())
   
+  // Relations
   creator        User      @relation("CreatedGroups", fields: [creatorId], references: [id])
   messages       Message[] @relation("Group_Messages")
   members        GroupMember[]
 }
 
-// Table pivot pour la relation Many-to-Many entre User et Group
 model GroupMember {
   userId         String
   groupId        String
   role           String @default("MEMBER")
   joinedAt       DateTime @default(now())
   
+  // Relations
   user           User   @relation(fields: [userId], references: [id])
   group          Group  @relation(fields: [groupId], references: [id])
   
@@ -108,19 +100,16 @@ model GroupMember {
 }
 
 
-// =========================================================
-// MODÈLE 5: MESSAGE (Message)
-// =========================================================
+// MESSAGE (Message)
 
-// Un message doit appartenir soit à un DM, soit à un Groupe.
 model Message {
   id             String    @id @default(cuid())
   content        String
   createdAt      DateTime  @default(now())
   
   // Clés étrangères
-  directMessageId String? // ID de la conversation privée (peut être NULL)
-  groupId         String? // ID du groupe (peut être NULL)
+  directMessageId String?
+  groupId         String?
   authorId        String
   
   // Relations

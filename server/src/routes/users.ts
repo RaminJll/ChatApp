@@ -8,6 +8,7 @@ import { authenticateToken } from '../middlewares/auth.middleware';
 const router: Router = Router();
 const userController = new UserController();
 
+// Récupérer tous les utilisateurs (pour la recherche d'amis)
 router.get('/allUsers', authenticateToken, userController.allUsers);
 
 

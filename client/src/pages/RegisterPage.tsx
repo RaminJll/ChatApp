@@ -3,7 +3,7 @@ import { useState, type FormEvent, type ChangeEvent } from 'react';
 import { type RegisterFormData } from '../types/authType';
 import { registerUser } from '../services/authService';
 import { AxiosError } from 'axios';
-import { useNavigate, Link } from 'react-router-dom'; // J'ai ajouté Link pour la navigation facile
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState<RegisterFormData>({
@@ -47,7 +47,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
-      {/* Carte principale */}
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-slate-800">Inscription</h2>
@@ -106,12 +105,12 @@ export default function RegisterPage() {
           {/* Alertes */}
           {error && (
             <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm border border-red-200 flex items-center gap-2">
-              ⚠️ {error}
+              {error}
             </div>
           )}
           {success && (
             <div className="bg-emerald-50 text-emerald-600 p-3 rounded-xl text-sm border border-emerald-200 flex items-center gap-2">
-              ✅ {success}
+              {success}
             </div>
           )}
 
@@ -125,7 +124,7 @@ export default function RegisterPage() {
         </form>
 
         <div className="mt-6 text-center text-sm text-slate-500">
-          Déjà un compte ?{' '}
+          Déjà un compte ? {' '}
           <Link to="/connexion" className="text-blue-600 font-semibold hover:underline">
             Se connecter
           </Link>

@@ -2,6 +2,8 @@
 import prisma from '../lib/prisma';
 
 export class FriendsService {
+
+  // Envoyer une demande d'ami
   async sendRequestService(senderId: string, receiverId: string) {
     try {
       if (senderId === receiverId) {
@@ -33,6 +35,7 @@ export class FriendsService {
     }
   }
 
+  // Récupérer les demandes d'ami reçues
   async getReceivedRequestsService(userId: string) {
     try {
       const requests = await prisma.friendship.findMany({
@@ -56,6 +59,7 @@ export class FriendsService {
     }
   }
 
+  // Accepter une demande d'ami
   async acceptRequestService(receiverId: string, senderIdToAccept: string) {
     try {
       const updatedFriendship = await prisma.friendship.update({
@@ -75,6 +79,7 @@ export class FriendsService {
     }
   }
 
+  // Refuser une demande d'ami
   async refuseRequestService(receiverId: string, senderIdToRefuse: string) {
     try {
       const deletedFriendship = await prisma.friendship.delete({
@@ -91,6 +96,7 @@ export class FriendsService {
     }
   }
 
+  // Récupérer la liste d'amis
   async getFriendsListService(userId: string) {
     try {
       const friendships = await prisma.friendship.findMany({
