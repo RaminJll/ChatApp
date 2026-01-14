@@ -44,7 +44,7 @@ export class FriendsController {
       if (!userId) return res.status(401).json({ error: "Non authentifié" });
 
       const requests = await friendsService.getReceivedRequestsService(userId);
-      
+
       return res.status(200).json(requests);
     } catch (error: any) {
       return res.status(500).json({ error: "Erreur lors de la récupération des demandes." });
@@ -89,7 +89,7 @@ export class FriendsController {
       if (!userId) return res.status(401).json({ error: "Non authentifié" });
 
       const friends = await friendsService.getFriendsListService(userId);
-      
+
       return res.status(200).json(friends);
     } catch (error: any) {
       return res.status(500).json({ error: "Erreur lors de la récupération des amis." });

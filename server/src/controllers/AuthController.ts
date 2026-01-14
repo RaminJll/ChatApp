@@ -38,7 +38,7 @@ export class AuthController {
                 }
             }
 
-            return res.status(500).json({ error: "Erreur interne lors de l'inscription." });
+            return res.status(500).json({ error: "Erreur interne lors de l'inscription." + error });
         }
     }
 

@@ -134,13 +134,4 @@ async function main() {
 
 }
 
-main()
-  .then(async () => {
-    console.log('Seed successful')
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+main();

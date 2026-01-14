@@ -34,7 +34,7 @@ export function useMessages(userId: string) {
       try {
         s.emit('leave_user_room', userId);
       } catch (e) {
-        // ignore if socket already closed
+        console.log(e);
       }
       s.disconnect();
       if (socketRef.current === s) socketRef.current = null;

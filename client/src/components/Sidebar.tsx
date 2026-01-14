@@ -24,13 +24,26 @@ interface SidebarProps {
 }
 
 export default function Sidebar(props: SidebarProps) {
-    const { view, searchQuery, selectedFriend, selectedGroup } = props;
-    
+
     // Liste à afficher selon la vue
-    const list = view === 'friends' ? props.friends
-        : view === 'groups' ? props.groups
-        : view === 'search' ? props.searchResults
-        : props.requests;
+    let list : any[];
+
+    switch (props.view) {
+        case 'friends':
+            list = props.friends;
+            break;
+        case 'groups':
+            list = props.groups;
+            break;
+        case 'search':
+            list = props.searchResults;
+            break;
+        case 'requests':
+            list = props.requests;
+            break;
+        default:
+            list = [];
+    }
 
     return (
         <div className="w-64 bg-white border-r flex flex-col">
@@ -39,18 +52,18 @@ export default function Sidebar(props: SidebarProps) {
                 <div className="flex gap-2 mb-3">
                     <button
                         onClick={() => props.onViewChange('friends')}
-                        className={`flex-1 py-2 px-3 rounded ${view === 'friends' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                        className={`flex-1 py-2 px-3 rounded ${props.view === 'friends' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
                     >
                         Amis
                     </button>
                     <button
                         onClick={() => props.onViewChange('groups')}
-                        className={`flex-1 py-2 px-3 rounded ${view === 'groups' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                        className={`flex-1 py-2 px-3 rounded ${props.view === 'groups' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
                     >
                         Groupes
                     </button>
                 </div>
-                
+
                 <div className="flex gap-2">
                     <button
                         onClick={() => props.onViewChange('search')}
@@ -65,8 +78,8 @@ export default function Sidebar(props: SidebarProps) {
                         Demandes
                     </button>
                 </div>
-                
-                {view === 'groups' && (
+
+                {props.view === 'groups' && (
                     <button
                         onClick={props.onCreateGroup}
                         className="w-full mt-2 py-2 px-3 bg-green-500 text-white rounded text-sm"
@@ -77,11 +90,11 @@ export default function Sidebar(props: SidebarProps) {
             </div>
 
             {/* Search input */}
-            {view === 'search' && (
+            {props.view === 'search' && (
                 <div className="p-4 border-b">
                     <input
                         type="text"
-                        value={searchQuery}
+                        value={props.searchQuery}
                         onChange={(e) => props.onSearchChange(e.target.value)}
                         placeholder="Rechercher..."
                         className="w-full p-2 border rounded"
@@ -92,10 +105,10 @@ export default function Sidebar(props: SidebarProps) {
 
             {/* List */}
             <div className="flex-1 overflow-y-auto p-2">
-                {list.map((item: any) => {
+                {list.map(item => {
                     // Friend
-                    if (view === 'friends') {
-                        const isSelected = selectedFriend?.id === item.id;
+                    if (props.view === 'friends') {
+                        const isSelected = props.selectedFriend?.id === item.id;
                         return (
                             <div
                                 key={item.id}
@@ -106,10 +119,10 @@ export default function Sidebar(props: SidebarProps) {
                             </div>
                         );
                     }
-                    
+
                     // Group
-                    if (view === 'groups') {
-                        const isSelected = selectedGroup?.id === item.id;
+                    if (props.view === 'groups') {
+                        const isSelected = props.selectedGroup?.id === item.id;
                         return (
                             <div
                                 key={item.id}
@@ -121,9 +134,9 @@ export default function Sidebar(props: SidebarProps) {
                             </div>
                         );
                     }
-                    
+
                     // Search result
-                    if (view === 'search') {
+                    if (props.view === 'search') {
                         return (
                             <div key={item.id} className="p-3 mb-1 rounded border flex justify-between items-center">
                                 <div>{item.username}</div>
@@ -136,7 +149,7 @@ export default function Sidebar(props: SidebarProps) {
                             </div>
                         );
                     }
-                    
+
                     // Request
                     return (
                         <div key={item.senderId} className="p-3 mb-1 rounded border">

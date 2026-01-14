@@ -18,25 +18,18 @@ interface ChatAreaProps {
 }
 
 export default function ChatArea(props: ChatAreaProps) {
-    // Si aucun ami ni groupe n'est sélectionné
-    if (!props.selectedFriend && !props.selectedGroup) {
-        return (
-            <div className="flex-1 flex items-center justify-center bg-gray-50">
-                <div className="text-center text-gray-400">
-                    <div className="text-5xl mb-4">💬</div>
-                    <div>Sélectionnez une conversation</div>
-                </div>
-            </div>
-        );
-    }
 
     // Déterminer si c'est une conversation de groupe ou privée
-    const isGroupChat = props.selectedGroup !== null;
-    
-    // Obtenir le nom à afficher
-    const chatName = isGroupChat 
-        ? props.selectedGroup!.name 
-        : props.selectedFriend!.username;
+    const isGroupChat = props.selectedGroup;
+
+    let chatName : any;
+
+    if (isGroupChat) {
+        chatName = props.selectedGroup?.name
+    }
+    else{
+        chatName = props.selectedFriend?.username
+    }
 
     // Fonction pour envoyer le message quand on appuie sur Entrée
     function handleKeyPress(event: React.KeyboardEvent) {
@@ -51,7 +44,7 @@ export default function ChatArea(props: ChatAreaProps) {
             <div className="p-4 border-b bg-white flex justify-between items-center">
                 <div>
                     <div className="font-semibold text-lg">{chatName}</div>
-                    
+
                     {/* Afficher le nombre de membres si c'est un groupe */}
                     {isGroupChat && (
                         <div className="text-sm text-gray-500">
@@ -59,11 +52,11 @@ export default function ChatArea(props: ChatAreaProps) {
                         </div>
                     )}
                 </div>
-                
+
                 {/* Bouton pour ajouter un membre (seulement pour les groupes) */}
                 {isGroupChat && (
-                    <button 
-                        onClick={props.onToggleAddMember} 
+                    <button
+                        onClick={props.onToggleAddMember}
                         className="px-4 py-2 bg-blue-500 text-white rounded"
                     >
                         + Ajouter membre
@@ -76,18 +69,17 @@ export default function ChatArea(props: ChatAreaProps) {
                 {props.messages.map(message => {
                     // Vérifier si le message a été envoyé par l'utilisateur actuel
                     const isMyMessage = String(message.authorId) === String(props.currentUserId);
-                    
+
                     return (
-                        <div 
-                            key={message.id} 
+                        <div
+                            key={message.id}
                             className={`mb-3 ${isMyMessage ? 'text-right' : 'text-left'}`}
                         >
                             <div
-                                className={`inline-block max-w-[70%] p-3 rounded ${
-                                    isMyMessage 
-                                        ? 'bg-blue-500 text-white' 
+                                className={`inline-block max-w-[70%] p-3 rounded ${isMyMessage
+                                        ? 'bg-blue-500 text-white'
                                         : 'bg-white border'
-                                }`}
+                                    }`}
                             >
                                 {/* Afficher le nom de l'auteur (seulement dans les groupes et si ce n'est pas moi) */}
                                 {!isMyMessage && isGroupChat && (
@@ -95,14 +87,13 @@ export default function ChatArea(props: ChatAreaProps) {
                                         {message.author.username}
                                     </div>
                                 )}
-                                
+
                                 {/* Contenu du message */}
                                 <div>{message.content}</div>
-                                
+
                                 {/* Heure du message */}
-                                <div className={`text-xs mt-1 ${
-                                    isMyMessage ? 'text-blue-100' : 'text-gray-400'
-                                }`}>
+                                <div className={`text-xs mt-1 ${isMyMessage ? 'text-blue-100' : 'text-gray-400'
+                                    }`}>
                                     {new Date(message.createdAt).toLocaleTimeString([], {
                                         hour: '2-digit',
                                         minute: '2-digit'
@@ -146,7 +137,7 @@ export default function ChatArea(props: ChatAreaProps) {
                                 ✕
                             </button>
                         </div>
-                        
+
                         {/* Liste des amis disponibles */}
                         <div className="max-h-64 overflow-y-auto">
                             {props.availableFriends.length === 0 ? (

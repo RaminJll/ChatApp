@@ -38,7 +38,7 @@ export class MessagesService {
     return newMessage;
   }
 
-  // 2. Récupérer l'historique privé
+  // Récupérer l'historique privé
   async getDirectMessages(userId: string, contactId: string) {
     const conversation = await prisma.directMessage.findFirst({
       where: {
