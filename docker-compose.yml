@@ -16,33 +16,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  
-  server:
-    build: 
-      context: ./server
-    container_name: chat_app_server
-    restart: always
-    env_file:
-      - ./server/.env
-    ports:
-      - "3000:3000"
-    depends_on:
-      db:
-        condition: service_healthy
-    command: sh -c "cp .env.example .env &&
-            npx prisma migrate deploy && 
-            npx prisma db seed && 
-            npm run dev"
 
-  client:
-    build: 
-      context: ./client 
-    container_name: chat_app_client
-    restart: always
-    ports:
-      - "5173:5173"
-    depends_on:
-      - server
 
 volumes:
   postgres_data:

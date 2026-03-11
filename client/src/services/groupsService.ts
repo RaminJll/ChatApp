@@ -1,38 +1,28 @@
 // src/services/groupsService.ts
 
-import axios from 'axios';
+import { api } from './api';
 import { type Group, type CreateGroupResponse } from '../types/groupsType';
-
-const getAuthHeader = () => {
-    const token = localStorage.getItem('token');
-    return { Authorization: `Bearer ${token}` };
-};
 
 // Créer un groupe
 export const createGroupApi = async (name: string): Promise<CreateGroupResponse> => {
-    const response = await axios.post<CreateGroupResponse>(
+    const response = await api.post<CreateGroupResponse>(
         '/api/groups/create',
-        { name },
-        { headers: getAuthHeader() }
+        { name }
     );
     return response.data;
 };
 
 // Récupérer mes groupes
 export const getUserGroupsApi = async (): Promise<Group[]> => {
-    const response = await axios.get<Group[]>(
-        '/api/groups/list',
-        { headers: getAuthHeader() }
-    );
+    const response = await api.get<Group[]>('/api/groups/list');
     return response.data;
 };
 
 // Ajouter un membre
 export const addMemberToGroupApi = async (groupId: string, userIdToAdd: string) => {
-    const response = await axios.post(
+    const response = await api.post(
         '/api/groups/add-member',
-        { groupId, userIdToAdd },
-        { headers: getAuthHeader() }
+        { groupId, userIdToAdd }
     );
     return response.data;
 };
