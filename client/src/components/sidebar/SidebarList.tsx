@@ -31,7 +31,7 @@ export function SidebarList(props: Props) {
             <div
               key={friend.id}
               onClick={() => props.onFriendClick(friend)}
-              className={`p-3 mb-1 rounded cursor-pointer ${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+              className={`p-3 mb-1 rounded cursor-pointer text-white ${isSelected ? 'bg-gray-900' : 'hover:bg-gray-900'}`}
             >
               {friend.username}
             </div>
@@ -50,7 +50,7 @@ export function SidebarList(props: Props) {
             <div
               key={group.id}
               onClick={() => props.onGroupClick(group)}
-              className={`p-3 mb-1 rounded cursor-pointer ${isSelected ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+              className={`p-3 mb-1 rounded cursor-pointer text-white ${isSelected ? 'bg-gray-900' : 'hover:bg-gray-900'}`}
             >
               <div className="font-medium">{group.name}</div>
               <div className="text-xs text-gray-500">{group.members.length} membres</div>
@@ -65,7 +65,7 @@ export function SidebarList(props: Props) {
     return (
       <div className="flex-1 overflow-y-auto p-2">
         {props.searchResults.map(user => (
-          <div key={user.id} className="p-3 mb-1 rounded border flex justify-between items-center">
+          <div key={user.id} className="p-4 mb-1 rounded text-white flex justify-between items-center">
             <div>{user.username}</div>
             <button
               onClick={() => void props.onSendRequest(String(user.id))}
@@ -82,8 +82,8 @@ export function SidebarList(props: Props) {
   return (
     <div className="flex-1 overflow-y-auto p-2">
       {props.requests.map(req => (
-        <div key={req.senderId} className="p-3 mb-1 rounded border">
-          <div className="font-medium mb-2">{req.sender.username}</div>
+        <div key={req.senderId} className="p-4 mb-1 rounded">
+          <div className="font-medium mb-2 text-white">{req.sender.username}</div>
           <div className="flex gap-2">
             <button
               onClick={() => void props.onAcceptRequest(req.senderId)}

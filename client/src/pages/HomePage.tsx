@@ -6,7 +6,7 @@ import { HomeProvider } from '../contexts/HomeContext';
 export default function HomePage() {
     return (
         <HomeProvider>
-            <div className="flex h-screen bg-gray-100">
+            <div className="flex h-screen bg-slate-900">
                 <Sidebar />
                 <ChatArea />
             </div>
